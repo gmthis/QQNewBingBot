@@ -34,10 +34,12 @@ kotlin由喷气脑(jetbrains)开发的jvm平台语言,与java有着近乎100%的
 
 下面是用一些配置的取值
 
-qq_login_method(可不存在): qrCode, paasword(实际上不是qrCode就是密码登录)
+qq_login_method(可不存在,默认是qrCode): qrCode, paasword(实际上不是qrCode就是密码登录)
+
 login_protocol(可不存在,默认是ANDROID_WATCH): ANDROID_PHONE, ANDROID_PAD, ANDROID_WATCH, IPAD, MACOS
 
 记得在cookie_dir指定的目录下面创建文件www.bing.com.cookies然后将new bing的cookie粘进去
+
 具体操作方法是,登录new bing,F12,控制台直接打印document.cookie,从中找到_U,key和值直接粘到文件里面即可,分号带不带都行
 
 ## 启动

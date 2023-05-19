@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm") version "1.8.21"
     kotlin("plugin.serialization") version "1.8.21"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    application
 }
 
 group = "cn.xd"
@@ -12,6 +14,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation(kotlin("stdlib"))
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.11.0"))
     implementation("com.squareup.okhttp3:okhttp")
@@ -34,13 +37,19 @@ tasks.test {
 }
 
 tasks.jar {
-    manifest.attributes["Main-Class"] = "com.example.MyMainClass"
+    manifest {
+        attributes(mapOf("Main-Class" to "cn.xd.newbingbot.MainKt"))
+    }
     val dependencies = configurations
         .runtimeClasspath
         .get()
         .map(::zipTree) // OR .map { zipTree(it) }
     from(dependencies)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+application {
+    mainClass.set("cn.xd.newbingbot.MainKt")
 }
 
 //kotlin {

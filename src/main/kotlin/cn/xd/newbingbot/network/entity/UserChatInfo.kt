@@ -31,6 +31,11 @@ data class UserChatInfo(
         val logger = LoggerFactory.getLogger(NewBingChatRequester::class.java) ?: throw Exception("意料之外的异常,logger构造失败")
     }
 
+    /**
+     * 为当前的会话发送一条新的消息,同时会监听消息通道来获取bing的回应.
+     *
+     * 该方案十分十分十分十分十分不合理,但是我懒得改🥱
+     */
     suspend fun sendNewBingChatMessage(message: String, requester: NewBingChatRequester, messageEvent: MessageEvent){
         if (chatIsNotLock && globalLockIsNotLocking){
             locking()

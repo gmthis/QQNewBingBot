@@ -28,8 +28,9 @@ class NewBingChatRequester @Throws(Exception::class) constructor() {
         const val OK = "{\"type\":6}$RS"
     }
 
-    val httpClient = OkHttpClient.Builder()
+    private val httpClient = OkHttpClient.Builder()
         .cookieJar(object: CookieJar{
+//            自动从指定的目录下读取cookie
             override fun loadForRequest(url: HttpUrl): List<Cookie> {
                 val cookieDir = config["cookie_dir"] ?: throw Exception("没有找到cookieDir配置,请在config.json中添加该配置")
                 val cookieFile = File("${cookieDir.jsonPrimitive.content}/${url.host}.cookie")
@@ -52,6 +53,7 @@ class NewBingChatRequester @Throws(Exception::class) constructor() {
                 return result
             }
 
+//            但并不会保存,保存的话下次请求就会type 7,原因不明
             override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 //                val cookieDir = config["cookieDir"] ?: throw Exception("没有找到cookieDir配置,请在config.json中添加该配置")
 //                val cookieFile = File("${cookieDir.jsonPrimitive.content}/${url.host}.cookie")
@@ -71,15 +73,20 @@ class NewBingChatRequester @Throws(Exception::class) constructor() {
             }
 
         })
+//        上代理,没代理反正用不了
         .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(
             config["proxy_host"]?.jsonPrimitive?.content ?: throw Exception("没有找到proxyHost配置或该配置配置错误,请在config.json中添加或该配置"),
             config["proxy_port"]?.jsonPrimitive?.int ?: throw Exception("没有找到proxyPort配置或该配置配置错误,请在config.json中添加或修改该配置")
         )))
+//        意义不明,理论上不需要这个心跳包
         .pingInterval(2, TimeUnit.SECONDS)
         .build()
 
+    /**
+     * 事件通道,当响应完成后会把结果塞到通道里
+     */
     val channel = Channel<JsonObject>(2)
-    val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * 请求创建一个新的会话
@@ -119,6 +126,9 @@ class NewBingChatRequester @Throws(Exception::class) constructor() {
     }
 
 
+    /**
+     * 用指定的会话发送一个新的消息
+     */
     suspend fun sendMessage(
         conversation: NewBingChatConversation,
         text: String
@@ -205,6 +215,9 @@ class NewBingChatRequester @Throws(Exception::class) constructor() {
         }.toString() + RS)
     }
 
+    /**
+     * 用于创建websocket
+     */
     private fun creatWebSocket(messageHandle: (webSocket: WebSocket, text: String) -> Unit): WebSocket {
         val request = Request.Builder()
             .url("wss://sydney.bing.com/sydney/ChatHub")

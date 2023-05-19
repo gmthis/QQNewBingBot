@@ -22,6 +22,7 @@ fun main() = runBlocking {
     val userNewBingChatMap = mutableMapOf<Long, UserChatInfo>()
     val workdir = config["mirai_workdir"]?.jsonPrimitive?.content ?: "."
     val cacheDir = config["mirai_cache"]?.jsonPrimitive?.content ?: "cache"
+//    创建bot,根据配置文件中设置的登陆方式决定,默认是扫码
     val bot = if ((config["qq_login_method"]?.jsonPrimitive?.content ?: "qrCode") == "qrCode") {
         BotFactory.newBot(
             config["qq"]?.jsonPrimitive?.long

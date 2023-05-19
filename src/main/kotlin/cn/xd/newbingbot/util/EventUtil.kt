@@ -10,6 +10,11 @@ import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.content
 
+/**
+ * 可以快速为群和好友创建有着不同规则但只需要一个name参数就可以同时定义的函数.
+ *
+ * 同时在该函数中完成对白名单和黑名单的判断
+ */
 @MessageDsl
 fun MessageEventSubscribersBuilder.instruction(
     name: String,
