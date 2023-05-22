@@ -1,5 +1,13 @@
 package cn.xd.newbingbot.network
 
+/**
+ * 一些用来发请求的参数,有些都不知道干啥的
+ *
+ * @property options [List]<[String]> 一些设置?
+ * @property allowed [List]<[String]> 我不道啊.
+ * @property sliceIds [List]<[String]> 我不道啊.
+ * @property newChatReceipt [List]<[String]> 要求新会话时发送的回执.
+ */
 object NewBingChatConfig {
     val options: List<String> = listOf(
         "deepleo",
@@ -28,11 +36,32 @@ object NewBingChatConfig {
     )
 }
 
-enum class NewBingModel(
+/**
+ * new bing的模式
+ *
+ * @param value 实际发送时的值
+ * @param chinese 中文名
+ *
+ * @property Balanced 平衡
+ * @property Creative 创意
+ * @property Precise 严谨
+ */
+enum class NewBingModel constructor(
     val value: String,
     val chinese: String
 ){
+    /**
+     * 平衡
+     */
     Balanced("galileo", "平衡"),
+
+    /**
+     * 创意
+     */
     Creative("h3imaginative", "创意"),
+
+    /**
+     * 严谨
+     */
     Precise("h3precise", "严谨")
 }

@@ -2,20 +2,22 @@
 
 ## 简介
 
-一个可以登录qq的机器人,用来和new bing聊天,和朋友聊天开玩笑然后就搓了,很简陋,仅限于能用(而且不好用,有很多问题都没修),
-别的别指望了.如果你正在学习kotlin或者mirai,可以考虑看一下,不过项目还有写注释,但很简单,代码量也不多.
+一个可以登录qq的机器人,用来和new bing聊天,和朋友聊天开玩笑然后就搓了,很简陋,仅限于能用(而且不好用,有很多问题都没修),别的别指望了.如果你正在学习kotlin或者mirai,可以考虑看一下.不过请注意,项目注释并不完全,不过代码很简单,量也不多.
+
+---
 
 项目依赖于[mirai](https://github.com/mamoe/mirai)实现.
 
 mirai项目是用kotlin编写的qq协议的实现,用于实现一些qq的机器人操作.
 
-kotlin由喷气脑(jetbrains)开发的jvm平台语言,与java有着近乎100%的完美互操作性,且拥有着现代的语法,大量的语法糖,十分适合自己
-闲的没事摸摸代码的时候使用.
+kotlin由喷气脑(jetbrains)开发的jvm平台语言,与java有着近乎100%的完美互操作性,且拥有着现代的语法,大量的语法糖,十分适合自己闲的没事摸摸代码的时候使用.
 
 ## 配置
-```json
+```json5
 {
-  "cookie_dir": "",
+  "cookies": {
+    "www.bing.com": "" 
+  },
   "proxy_host": "",
   "proxy_port": 0,
   "qq": 0,
@@ -26,19 +28,20 @@ kotlin由喷气脑(jetbrains)开发的jvm平台语言,与java有着近乎100%的
   "authorized_group": [0],
   "mirai_workdir": ".",
   "mirai_cache": "cache",
-  "blacklist": [0]
+  "blacklist": [0],
+  "owner": 0,
+  "admin": [0]
 }
 ```
-目前只有这些配置文件,有些配置是必须比如cookie_dir,proxy_hose,proxy_port,qq等,有些则不是,有这些差异主要是因为写着
-写着风格就变了,害
+目前只有这些配置文件,有些配置是必须比如cookies,proxy_hose,proxy_port,qq
 
 下面是用一些配置的取值
 
-qq_login_method(可不存在,默认是qrCode): qrCode, paasword(实际上不是qrCode就是密码登录)
+qq_login_method(可不存在,默认是qrCode): qrCode, paasword(任意字符串,不写也行,反正根本不判断除了qrCode以外的任何字符串)
 
 login_protocol(可不存在,默认是ANDROID_WATCH): ANDROID_PHONE, ANDROID_PAD, ANDROID_WATCH, IPAD, MACOS
 
-记得在cookie_dir指定的目录下面创建文件www.bing.com.cookies然后将new bing的cookie粘进去
+记得在cookies中添加www.bing.com配置然后将new bing的cookie粘进去
 
 具体操作方法是,登录new bing,F12,控制台直接打印document.cookie,从中找到_U,key和值直接粘到文件里面即可,分号带不带都行
 

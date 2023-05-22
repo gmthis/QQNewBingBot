@@ -6,8 +6,11 @@ import cn.xd.newbingbot.network.NewBingChatConfig
 import cn.xd.newbingbot.network.NewBingChatRequester
 import cn.xd.newbingbot.network.NewBingModel
 import cn.xd.newbingbot.network.entity.UserChatInfo
+import cn.xd.newbingbot.util.UserPermissions
 import cn.xd.newbingbot.util.instruction
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import net.mamoe.mirai.BotFactory
@@ -18,7 +21,9 @@ import net.mamoe.mirai.utils.BotConfiguration
 import java.io.File
 
 fun main() = runBlocking {
+//    记录开机时间
     val startTimeMillis = System.currentTimeMillis()
+//    映射着用户聊天信息的map,没有持久化,关了就没了
     val userNewBingChatMap = mutableMapOf<Long, UserChatInfo>()
     val workdir = config["mirai_workdir"]?.jsonPrimitive?.content ?: "."
     val cacheDir = config["mirai_cache"]?.jsonPrimitive?.content ?: "cache"
@@ -57,6 +62,28 @@ fun main() = runBlocking {
     bot.login()
     logger.info("QQ登陆成功")
 
+    val replyJob = launch(
+        Dispatchers.IO
+    ) {
+        try {
+            while (isActive) {
+                val (event,jsonObject, currentChatConversation) = requester.channel.receive()
+                val array = jsonObject["item"]?.jsonObject?.get("messages")?.jsonArray ?: continue
+                val response = array.first { element ->
+                    element.jsonObject["suggestedResponses"] != null
+                }.jsonObject
+                val result = response["text"]?.jsonPrimitive?.content ?: "接收到了错误的内容"
+                currentChatConversation.conversationChain.add(result)
+                event.subject.sendMessage(event.message.quote() + result)
+                logger.info("在主题: ${event.subject}中向用户: ${event.sender}发送消息: $result")
+            }
+        }catch (e: CancellationException){
+            requester.channel.cancel()
+            logger.info("消息回复事件处理器已关闭")
+        }
+    }
+    logger.info("消息回复事件处理器已启动")
+
     bot.eventChannel.subscribeMessages {
         instruction("chat") {
             val info = userNewBingChatMap[sender.id] ?: run {
@@ -71,7 +98,7 @@ fun main() = runBlocking {
         }
         instruction("new") {
             val info = userNewBingChatMap[sender.id] ?: run {
-                subject.sendMessage(message.quote() + NewBingChatConfig.newChatReceipt.random())
+                subject.sendMessage(message.quote() + "没有找到聊天信息")
                 return@instruction
             }
             info.newChat()
@@ -177,7 +204,8 @@ fun main() = runBlocking {
                         "choose *: 切换会话上下文,*为任意在取值范围内的由阿拉伯数字组成的正整数\n" +
                         "clear: 清除所有保存的会话(暂不支持删除一个,如果发送了该命令,会直接清空,谨慎使用)\n" +
                         "help: 查看帮助\n" +
-                        "info: 查看bot信息"
+                        "info: 查看bot信息\n" +
+                        "shutdown: 关闭bot,这需要最高权限,所以你就别试啦~"
             )
         }
         instruction("info") {
@@ -188,7 +216,13 @@ fun main() = runBlocking {
                         "已运行: ${(System.currentTimeMillis() - startTimeMillis) / 3600000} 小时"
             )
         }
-        logger.info("监听挂载完成")
+        instruction("shutdown", UserPermissions.OWNER){
+            subject.sendMessage(message.quote() + "正在尝试关闭程序")
+            bot.close()
+            logger.info("机器人已关闭")
+            replyJob.cancel()
+            logger.info("已关闭手头能关闭的所有资源,请等待其余线程的关闭")
+        }
+        logger.info("bot消息事件监听挂载完成")
     }
-    Unit
 }
